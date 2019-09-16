@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from meiduo_mall.libs.captcha.captcha import captcha
-from meiduo_mall.libs.yuntongxun.sms import CCP
+from celery_tasks.sms.tasks import send_sms
+from users.models import User
 
 from verifications.serializers import CheckImageCodeSerializer
 from . import constants
@@ -34,7 +35,7 @@ class SMSCodeView(GenericAPIView):
     serializer_class = CheckImageCodeSerializer
 
     def get(self, request, mobile):
-        serializer = self.get_serializer()
+        serializer = self.get_serializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
         sms_code = '%06d' % random.randint(0, 999999)
@@ -49,8 +50,29 @@ class SMSCodeView(GenericAPIView):
         # 提交执行
         pipeline.execute()
         # 使用Redis的pipeline管道,一次处理多e个命令
-        ccp = CCP()
-        time = str(constants.SMS_CODE_REDIS_EXPIRE / 60)
-        ccp.send_template_sms(mobile, [sms_code, time], constants.SMS_CODE_TEMPLATE_ID)
-
+        # ccp = CCP()
+        # time = str(constants.SMS_CODE_REDIS_EXPIRE / 60)
+        # ccp.send_template_sms(mobile, [sms_code, time], constants.SMS_CODE_TEMPLATE_ID)
+        send_sms.delay(mobile, sms_code)
         return Response({"message": "ok"})
+
+
+class UsernameCountView(APIView):
+
+    def get(self, request, username):
+        count = User.objects.filter(username=username).count()
+        data = {
+            "username": username,
+            "count": count
+        }
+        return Response(data)
+
+
+class MobileCountView(APIView):
+    def get(self, request, mobile):
+        count = User.objects.filter(mobile=mobile).count()
+        data = {
+            "mobile": mobile,
+            "count": count
+        }
+        return Response(data)

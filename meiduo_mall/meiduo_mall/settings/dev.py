@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+import datetime
 import os
 import sys
 
@@ -29,7 +29,16 @@ SECRET_KEY = '%2u3i8vemoz=z_d=45d!cb)v4@&$61i24s9y(mcy$kavx0^a28'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.meiduo.site', 'api.meiduo.site']
+
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.meiduo.site:8080',
+    'http://api.meiduo.site:8080'
+)
+
+CORS_ALLOW_CREDENTIALS = True  # 允许浏览器发起跨域请求的时候携带上原来的cookies信息
 
 # Application definition
 
@@ -40,12 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     # 'meiduo_mall.apps.users.apps'
     'users.apps.UsersConfig',  # 是由于前面将apps加入包路径,在可以这么写，如果没加，按照上面写
     'verifications.apps.VerificationsConfig'
 ]
 
+# 中间件接受请求顺序是由上到下，返回是由下到上
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 支持options嗅探的请求方式中间件，坚决跨域问题
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,9 +100,6 @@ DATABASES = {
         'NAME': 'meiduo_mall'  # 数据库名字
     }
 }
-
-# 使用扩展的Django模型类作为认证模型，格式：应用名.模型名，在install_app里面找
-AUTH_USER_MODEL = "users.User"
 
 # Redis
 
@@ -202,4 +211,17 @@ LOGGING = {
 REST_FRAMEWORK = {
     # 异常处理
     'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
+
+# 有效期
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+}
+
+# 使用扩展的Django模型类作为认证模型，格式：应用名.模型名，在install_app里面找
+AUTH_USER_MODEL = "users.User"

@@ -1,6 +1,7 @@
-var vm = new Vue({
+let vm = new Vue({
     el: '#app',
     data: {
+        host: host,
         error_name: false,
         error_password: false,
         error_check_password: false,
@@ -19,7 +20,11 @@ var vm = new Vue({
         allow: false,
         image_code_id: '',
         image_code_url: '',
-        send_flag: false
+        send_flag: false,
+        error_image_code_message: '',
+        error_sms_code_message: '',
+        error_username_message: '',
+        error_phone_message: ''
     },
     mounted: function () {
         this.generate_image_code()
@@ -33,7 +38,7 @@ var vm = new Vue({
     methods: {
         generate_image_code: function () {
             this.image_code_id = this.generate_uuid();
-            this.image_code_url = "http://127.0.0.1:8000/image_code/" + this.image_code_id;
+            this.image_code_url = this.host + "/image_code/" + this.image_code_id;
         },
         // 生成uuid
         generate_uuid: function () {
@@ -52,9 +57,24 @@ var vm = new Vue({
             var len = this.username.length;
             if (len < 5 || len > 20) {
                 this.error_name = true;
+                this.error_username_message = "请输入5-20个字符的用户";
             } else {
                 this.error_name = false;
             }
+
+            axios.get(this.host + '/username/' + this.username, {
+                responseType: "json"
+            }).then(response => {
+                if (response.data.count > 0) {
+                    this.error_name = true;
+                    this.error_phone_message = "当前用户名已被注册";
+                    return;
+                } else {
+                    this.error_name = false;
+                }
+            }).catch(error => {
+                console.log(error.response.data);
+            })
         },
         check_pwd: function () {
             var len = this.password.length;
@@ -77,11 +97,27 @@ var vm = new Vue({
                 this.error_phone = false;
             } else {
                 this.error_phone = true;
+                this.error_phone_message = "您输入的手机号格式不正确";
+                return;
             }
+
+            axios.get(this.host + '/mobile/' + this.mobile, {
+                responseType: "json"
+            }).then(response => {
+                if (response.data.count > 0) {
+                    this.error_name = true;
+                    this.error_phone_message = "当前手机号已被注册";
+                } else {
+                    this.error_name = false;
+                }
+            }).catch(error => {
+                console.log(error.response.data);
+            })
         },
         check_image_code: function () {
             if (!this.image_code) {
                 this.error_image_code = true;
+                this.error_image_code_message = "请填写图片验证码";
             } else {
                 this.error_image_code = false;
             }
@@ -89,6 +125,7 @@ var vm = new Vue({
         check_sms_code: function () {
             if (!this.sms_code) {
                 this.error_sms_code = true;
+                this.error_sms_code_message = "请填写手机验证码"
             } else {
                 this.error_sms_code = false;
             }
@@ -113,11 +150,10 @@ var vm = new Vue({
             if (this.send_flag === true) {
                 return;
             }
-            ;
             this.send_flag = true;
-            this.check_mobile();
+            this.check_phone();
 
-            axios.get("http://127.0.0.1:8080/sms_codes/" + this.mobile +"?text=" + this.image_code +"&image_code_id"
+            axios.get(this.host + "/sms_codes/" + this.mobile + "?text=" + this.image_code + "&image_code_id="
                 + this.image_code_id, {
                 responseType: "json"
             })

@@ -11,6 +11,9 @@ django-redis = "*"
 pymysql = "*"
 pillow = "*"
 captcha = "*"
+celery = "*"
+django-cors-headers = "*"
+djangorestframework-jwt = "*"
 
 [dev-packages]
 

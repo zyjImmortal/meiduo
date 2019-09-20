@@ -9,7 +9,7 @@ from users.models import User
 
 class CreateUserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(label="确认密码", required=True,
-                                             allow_null=False, allow_blank=False, write_only=True)
+                                      allow_null=False, allow_blank=False, write_only=True)
     sms_code = serializers.CharField(label="验证码", required=True, allow_null=False,
                                      allow_blank=False, write_only=True)
     allow = serializers.CharField(label="同意协议", required=True, allow_null=False,

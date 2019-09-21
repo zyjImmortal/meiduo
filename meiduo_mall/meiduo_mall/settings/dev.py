@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'corsheaders',
     # 'meiduo_mall.apps.users.apps'
     'users.apps.UsersConfig',  # 是由于前面将apps加入包路径,在可以这么写，如果没加，按照上面写
@@ -218,10 +219,16 @@ REST_FRAMEWORK = {
     ),
 }
 
-# 有效期
+# JWT认证配置
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),  # 有效期
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.utils.jwt_response_payload_handler'  # 自定义jwt认证成功后相应数据
 }
 
 # 使用扩展的Django模型类作为认证模型，格式：应用名.模型名，在install_app里面找
 AUTH_USER_MODEL = "users.User"
+
+# 改变Django的认证后端方法
+AUTHENTICATION_BACKENDS = [
+    'users.utils.UsernameMobileAuthBackend'
+]

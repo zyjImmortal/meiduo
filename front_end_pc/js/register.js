@@ -62,7 +62,7 @@ let vm = new Vue({
                 this.error_name = false;
             }
 
-            axios.get(this.host + '/username/' + this.username, {
+            axios.get(this.host + '/usernames/' + this.username, {
                 responseType: "json"
             }).then(response => {
                 if (response.data.count > 0) {
@@ -101,7 +101,7 @@ let vm = new Vue({
                 return;
             }
 
-            axios.get(this.host + '/mobile/' + this.mobile, {
+            axios.get(this.host + '/mobiles/' + this.mobile, {
                 responseType: "json"
             }).then(response => {
                 if (response.data.count > 0) {

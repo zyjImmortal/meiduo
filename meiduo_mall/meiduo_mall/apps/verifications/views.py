@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 
 from meiduo_mall.libs.captcha.captcha import captcha
 from celery_tasks.sms.tasks import send_sms
-from users.models import User
 
 from verifications.serializers import CheckImageCodeSerializer
 from . import constants
@@ -55,24 +54,3 @@ class SMSCodeView(GenericAPIView):
         # ccp.send_template_sms(mobile, [sms_code, time], constants.SMS_CODE_TEMPLATE_ID)
         send_sms.delay(mobile, sms_code)
         return Response({"message": "ok"})
-
-
-class UsernameCountView(APIView):
-
-    def get(self, request, username):
-        count = User.objects.filter(username=username).count()
-        data = {
-            "username": username,
-            "count": count
-        }
-        return Response(data)
-
-
-class MobileCountView(APIView):
-    def get(self, request, mobile):
-        count = User.objects.filter(mobile=mobile).count()
-        data = {
-            "mobile": mobile,
-            "count": count
-        }
-        return Response(data)

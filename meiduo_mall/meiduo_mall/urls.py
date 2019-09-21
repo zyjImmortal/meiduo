@@ -16,9 +16,16 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('verifications.urls')),
-    url(r'^', include('users.urls'))
+    url(r'^', include('users.urls')),
+    url(r'^', include('rest_framework.urls'))
 ]
+
+
+route = routers.DefaultRouter()
+
+urlpatterns += route.urls

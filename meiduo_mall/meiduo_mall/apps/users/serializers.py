@@ -55,12 +55,14 @@ class CreateUserSerializer(serializers.ModelSerializer):
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
+
         user.token = token
         user.save()
         return user
 
     class Meta:
         model = User
+        # fields = '__all__' 指定模型那些字段映射到序列化器，，__all__模型类全部字段都映射到序列化器中
         fields = ('id', 'username', 'password', 'password2', 'sms_code', 'mobile', 'allow', 'token')
         extra_kwargs = {
             'id': {'read_only': True},

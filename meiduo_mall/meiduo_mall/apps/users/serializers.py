@@ -8,6 +8,7 @@ from users.models import User
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
+    # 定义序列化器字段，可以对参数进行初步校验
     password2 = serializers.CharField(label="确认密码", required=True,
                                       allow_null=False, allow_blank=False, write_only=True)
     sms_code = serializers.CharField(label="验证码", required=True, allow_null=False,

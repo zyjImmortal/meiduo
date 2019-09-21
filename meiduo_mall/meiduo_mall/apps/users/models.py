@@ -13,5 +13,5 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'tb_users'
-        verbose_name = "用户"
-        verbose_name_plural = verbose_name
+        verbose_name = "用户"  # 指明一个易于理解和表述的对象名称，单数形式
+        verbose_name_plural = verbose_name  # 复数形式

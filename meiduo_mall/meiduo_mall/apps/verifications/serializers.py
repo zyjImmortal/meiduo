@@ -34,10 +34,14 @@ class CheckImageCodeSerializer(serializers.Serializer):
 
         if real_image_code.lower() != attrs['text'].lower():
             raise serializers.ValidationError("图片验证码错误")
-        mobile = self.context['view'].kwargs['mobile']
-        send_flag = redis_conn.get("send_flag_%s" % mobile)
-        if send_flag:
-            raise serializers.ValidationError("发送短信验证码过于频繁,请稍后再试")
+        mobile = self.context['view'].kwargs.get('mobile')
+        # 有两种场景需要使用图片验证码序列化器
+        # 1、注册的时候，2、找回密码的时候，但是在第二种场景，可能输入的是用户名或者手机号，所以为了兼容两种场景，
+        # 这里需要判断能后从上下文中获取到手机号，如果能则进行校验，如果不能则返回就行
+        if mobile:
+            send_flag = redis_conn.get("send_flag_%s" % mobile)
+            if send_flag:
+                raise serializers.ValidationError("发送短信验证码过于频繁,请稍后再试")
         return attrs
 
     def update(self, instance, validated_data):

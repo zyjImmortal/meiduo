@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import serializers
 from django_redis import get_redis_connection
 import re
@@ -5,6 +7,8 @@ import re
 from rest_framework_jwt.settings import api_settings
 
 from users.models import User
+
+logger = logging.getLogger('django')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -25,22 +29,25 @@ class CreateUserSerializer(serializers.ModelSerializer):
     def validate_mobile(self, value):
         if not re.match(r'1[3-9]\d{9}$', value):
             raise serializers.ValidationError("手机号格式错误")
+        # 针对单个字段的校验，必须把原值返回，否则在调用validate方法时传入的data中会缺少，这个校验字段
+        return value
 
     def validate_allow(self, value):
         if value != 'true':
             raise serializers.ValidationError("请同意用户协议")
+        return value
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
+    def validate(self, data):
+        if data['password'] != data['password2']:
             raise serializers.ValidationError("两次密码不一致")
         redis_conn = get_redis_connection("verify_codes")
-        mobile = attrs['mobile']
+        mobile = data['mobile']
         real_sms_code = redis_conn.get("sms_%s" % mobile)
         if not real_sms_code:
             raise serializers.ValidationError("验证码已过期")
-        if real_sms_code.decode() != attrs['sms_code']:
+        if real_sms_code.decode() != data['sms_code']:
             raise serializers.ValidationError("输入的验证码错误")
-        return attrs
+        return data
 
     def create(self, validated_data):
         # 移除数据库不存在的属性
@@ -84,3 +91,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
                 }
             }
         }
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'mobile', 'email', 'email_active')

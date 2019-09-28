@@ -39,3 +39,30 @@ class User(AbstractUser):
         else:
             mobile = data.get('mobile')
             return mobile
+
+    def generate_email_verify_url(self):
+        serializer = TJSerializer(secret_key=settings.SECRET_KEY, expires_in=constants.EMAIL_VERIFY_TOKEN_EXPIRES)
+        data = {
+            'user_id': self.id,
+            'email': self.email
+        }
+        token = serializer.dumps(data)
+        verify_url = 'http://www.meiduo.site:8080/success_verify_email.html?token=' + token.decode()
+        return verify_url
+
+    @staticmethod
+    def check_email_verify_token(token):
+        serializer = TJSerializer(secret_key=settings.SECRET_KEY, expires_in=constants.EMAIL_VERIFY_TOKEN_EXPIRES)
+        try:
+            data = serializer.loads(token)
+        except BadData:
+            return False
+        else:
+            email = data.get('email')
+            user_id = data.get('user_id')
+            # 查询用户并更新字段的两种方式
+            # user = User.objects.get(id=user_id, email=email)
+            # user.email_active = True
+            # user.save()
+            User.objects.filter(id=user_id, email=email).update(email_active=True)
+            return True

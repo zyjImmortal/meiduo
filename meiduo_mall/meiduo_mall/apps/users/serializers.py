@@ -5,7 +5,7 @@ from django_redis import get_redis_connection
 import re
 
 from rest_framework_jwt.settings import api_settings
-
+from celery_tasks.emails.tasks import send_verify_email
 from users.models import User
 
 logger = logging.getLogger('django')
@@ -97,3 +97,25 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'mobile', 'email', 'email_active')
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email')
+        # email字段是Django自带生成的，不是必填项，所以需要加扩展要求
+        extra_kwargs = {
+            'email': {
+                'required': True
+            }
+        }
+
+    def update(self, instance, validated_data):
+        email = validated_data['email']
+        instance.email = email
+        instance.save()
+        # 生成激活链接
+        verify_url = instance.generate_email_verify_url()
+        # 发送邮件
+        send_verify_email.delay(email, verify_url)
+        return instance

@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'corsheaders',
     # 'meiduo_mall.apps.users.apps'
     'users.apps.UsersConfig',  # 是由于前面将apps加入包路径,在可以这么写，如果没加，按照上面写
-    'verifications.apps.VerificationsConfig'
+    'verifications.apps.VerificationsConfig',
+    'areas.apps.AreasConfig'
 ]
 
 # 中间件接受请求顺序是由上到下，返回是由下到上
@@ -232,3 +233,11 @@ AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = [
     'users.utils.UsernameMobileAuthBackend'
 ]
+
+# 发送邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'zyj866955@163.com'
+EMAIL_HOST_PASSWORD = 'zyj866955'
+EMAIL_FROM = '美多商城<zyj866955@163.com>'

@@ -1,5 +1,5 @@
 # Create your views here.
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers
@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from users.models import User
-from users.serializers import CreateUserSerializer, UserDetailSerializer
+from users.serializers import CreateUserSerializer, UserDetailSerializer, EmailSerializer
 from users.utils import get_user_by_account
 from verifications.serializers import CheckImageCodeSerializer
 import re
@@ -85,3 +85,26 @@ class UserDetailView(RetrieveAPIView):
         :return User 返回请求的用户对象
         """
         return self.request.user
+
+
+class EmailView(UpdateAPIView):
+
+    def get_object(self):
+        return self.request.user
+
+    def get_serializer(self, *args, **kwargs):
+        return EmailSerializer(self.request.user, data=self.request.data)
+
+
+class EmailVerifyView(APIView):
+    """邮箱验证"""
+
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({"缺少token"}, status=status.HTTP_400_BAD_REQUEST)
+        result = User.check_email_verify_token(token)
+        if result:
+            return Response({"message": "ok"})
+        else:
+            return Response({"message": "非法的token"}, status=status.HTTP_400_BAD_REQUEST)

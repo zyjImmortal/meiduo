@@ -220,6 +220,11 @@ REST_FRAMEWORK = {
     ),
 }
 
+REST_FRAMEWORK_EXTENSIONS = {
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60 * 60,
+    'DEFAULT_USE_CACHE': 'default'
+}
+
 # JWT认证配置
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),  # 有效期

@@ -15,6 +15,7 @@ celery = "*"
 django-cors-headers = "*"
 djangorestframework-jwt = "*"
 itsdangerous = "*"
+drf-extensions = "*"
 
 [dev-packages]
 

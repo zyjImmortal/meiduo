@@ -24,6 +24,15 @@ class SubAreaSerializer(serializers.ModelSerializer):
 
 
 class AddressSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        if isinstance(validated_data, dict):
+            validated_data.setdefault('user_id', self.context.get('request').user.id)
+        address = super().create(validated_data)
+
+        address.save()
+        return address
+
     class Meta:
         model = Address
         fields = ('receiver', 'title', 'province', 'city', 'district', 'place', 'mobile', 'tel', 'email')

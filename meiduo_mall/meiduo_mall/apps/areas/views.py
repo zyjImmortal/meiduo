@@ -2,9 +2,10 @@ from django.shortcuts import render
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
-from users.models import Address
+from meiduo_mall.apps.areas.serializers import AddressSerializer
 from .models import Area
 from . import serializers
+from users.models import Address
 
 
 # Create your views here.
@@ -34,3 +35,4 @@ class AreasViewSet(CacheResponseMixin, ReadOnlyModelViewSet):
 
 class AddressViewSet(ModelViewSet):
     queryset = Address.objects.all()
+    serializer_class = AddressSerializer

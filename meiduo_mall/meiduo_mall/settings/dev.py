@@ -54,7 +54,9 @@ INSTALLED_APPS = [
     # 'meiduo_mall.apps.users.apps'
     'users.apps.UsersConfig',  # 是由于前面将apps加入包路径,在可以这么写，如果没加，按照上面写
     'verifications.apps.VerificationsConfig',
-    'areas.apps.AreasConfig'
+    'areas.apps.AreasConfig',
+    'goods.apps.GoodsConfig',
+    'contents.apps.ContentsConfig'
 ]
 
 # 中间件接受请求顺序是由上到下，返回是由下到上

@@ -2,12 +2,13 @@
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
 
-from users.models import User
-from users.serializers import CreateUserSerializer, UserDetailSerializer, EmailSerializer
+from users import constants
+from users.models import User, Address
+from users.serializers import CreateUserSerializer, UserDetailSerializer, EmailSerializer, AddressSerializer
 from users.utils import get_user_by_account
 from verifications.serializers import CheckImageCodeSerializer
 import re
@@ -108,3 +109,33 @@ class EmailVerifyView(APIView):
             return Response({"message": "ok"})
         else:
             return Response({"message": "非法的token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddressViewSet(ModelViewSet):
+    serializer_class = AddressSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.address.filter(is_deleted=True)
+
+    def list(self, request, *args, **kwargs):
+        query_set = self.get_queryset()
+        # 如果要被序列化的是包含多条数据的查询集QuerySet，可以通过添加many=True参数补充说明
+        serializer = AddressSerializer(query_set, many=True)
+        user = self.request.user
+        return Response({
+            'user_id': user.id,
+            'limit': constants.USER_ADDRESS_COUNTS_LIMIT,
+            'default_address_id': user.default_address_id,
+            'addresses': serializer.data
+        })
+
+    def create(self, request, *args, **kwargs):
+        """
+                保存用户地址数据
+                """
+        # 检查用户地址数据数目不能超过上限
+        count = request.user.addresses.count()
+        if count >= constants.USER_ADDRESS_COUNTS_LIMIT:
+            return Response({'message': '保存地址数据已达到上限'}, status=status.HTTP_400_BAD_REQUEST)
+        return super().create(request, *args, **kwargs)

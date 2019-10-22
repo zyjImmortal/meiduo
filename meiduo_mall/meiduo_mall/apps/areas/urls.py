@@ -4,9 +4,10 @@ from . import views
 
 router = DefaultRouter()
 router.register('areas', views.AreasViewSet, base_name='area')
-router.register('address', views.AddressViewSet, base_name='address')
 urlpatterns = [
     # url('', include(router.urls))  和下面的注册url方式一样的效果
+    # url(r'areas/$', views.AreasViewSet.as_view({'get:list'})),
+    # url('address/$', views.AddressViewSet.as_view({'get:list'}))
 ]
 
 urlpatterns += router.urls

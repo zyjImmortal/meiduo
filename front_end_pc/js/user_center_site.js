@@ -10,6 +10,7 @@ var vm = new Vue({
         cities: [],
         districts: [],
         addresses: [],
+        addresses_size:0,
         limit: '',
         default_address_id: '',
         form_address: {
@@ -50,6 +51,7 @@ var vm = new Vue({
                 this.addresses = response.data.addresses;
                 this.limit = response.data.limit;
                 this.default_address_id = response.data.default_address_id;
+                this.addresses_size = this.addresses.length;
             })
             .catch(error => {
                 status = error.response.status;
@@ -189,6 +191,7 @@ var vm = new Vue({
                         .then(response => {
                             // 将新地址添加大数组头部
                             this.addresses.splice(0, 0, response.data);
+                            this.addresses_size++;
                             this.is_show_edit = false;
                         })
                         .catch(error => {
@@ -199,7 +202,7 @@ var vm = new Vue({
         },
         // 删除地址
         del_address: function (index) {
-            axios.delete(this.host + '/users/' + this.user_id + '/addresses/' + this.addresses[index].id + '/', {
+            axios.delete(this.host + '/addresses/' + this.addresses[index].id + '/', {
                 headers: {
                     'Authorization': 'JWT ' + this.token
                 },
@@ -208,6 +211,7 @@ var vm = new Vue({
                 .then(response => {
                     // 从数组中移除地址
                     this.addresses.splice(index, 1);
+                    this.addresses_size--;
                 })
                 .catch(error => {
                     console.log(error.response.data);

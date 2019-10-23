@@ -1,4 +1,5 @@
 # Create your views here.
+from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -116,7 +117,8 @@ class AddressViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return self.request.user.address.filter(is_deleted=True)
+        # Address模型中关联了User,通过addresses
+        return self.request.user.addresses.filter(is_deleted=False)
 
     def list(self, request, *args, **kwargs):
         query_set = self.get_queryset()
@@ -132,10 +134,38 @@ class AddressViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-                保存用户地址数据
-                """
+           保存用户地址数据
+        """
         # 检查用户地址数据数目不能超过上限
         count = request.user.addresses.count()
         if count >= constants.USER_ADDRESS_COUNTS_LIMIT:
             return Response({'message': '保存地址数据已达到上限'}, status=status.HTTP_400_BAD_REQUEST)
         return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        address = self.get_object()
+        address.is_deleted = True
+        address.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['put'], detail=True)  # detail=True表示使用通过URL获取的主键对应的数据对象
+    def status(self, request, pk=None, address_id=None):
+        """
+        设置默认地址
+        :param request:
+        :param pk:
+        :param address_id:
+        :return:
+        """
+        address = self.get_object()
+        request.user.default_address = address
+        request.user.save()
+        return Response({"message": "ok"}, status=status.HTTP_200_OK)
+
+    @action(methods=['put'], detail=True)
+    def title(self, request, pk=None, address_id=None):
+        address = self.get_object()
+        serializer = AddressSerializer(instance=address, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

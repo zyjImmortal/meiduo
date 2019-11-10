@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^', include('users.urls')),
     url(r'^', include('rest_framework.urls')),
     url(r'^', include('areas.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls'))
 ]
 
 route = routers.DefaultRouter()

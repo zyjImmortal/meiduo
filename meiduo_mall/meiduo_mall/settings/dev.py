@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'ckeditor',
+    'ckeditor_uploader',
     # 'meiduo_mall.apps.users.apps'
     'users.apps.UsersConfig',  # 是由于前面将apps加入包路径,在可以这么写，如果没加，按照上面写
     'verifications.apps.VerificationsConfig',
@@ -248,3 +250,13 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = 'zyj866955@163.com'
 EMAIL_HOST_PASSWORD = 'zyj866955'
 EMAIL_FROM = '美多商城<zyj866955@163.com>'
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        #     'weight': 300
+    }
+}
+# ck的文件存储路径，因为使用自己的文件存储服务，所以设置为空就行
+CKEDITOR_UPLOAD_PATH = ''

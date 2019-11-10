@@ -16,6 +16,9 @@ django-cors-headers = "*"
 djangorestframework-jwt = "*"
 itsdangerous = "*"
 drf-extensions = "*"
+requests = "*"
+mutagen = "*"
+django-ckeditor = "*"
 
 [dev-packages]
 
